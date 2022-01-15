@@ -130,11 +130,42 @@ jobs:
           name: ${{ matrix.target.artifact-name }}
           path: compiler/target/${{ matrix.target.target }}/release/${{ matrix.target.build-name }}
 
+  build-compiler-musl:
+    name: Build Rust Compiler (linux MUSL)
+    runs-on: ubuntu-latest
+    container: 
+      image: ekidd/rust-musl-builder:stable
+      options: --user root
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        if: github.event_name == 'push' && github.repository == 'facebook/relay' && github.ref == 'refs/heads/main'
+        with:
+          node-version: 16.x
+          cache: 'yarn'
+      - name: Install dependencies
+        if: github.event_name == 'push' && github.repository == 'facebook/relay' && github.ref == 'refs/heads/main'
+        run: yarn install --frozen-lockfile --ignore-scripts
+      - name: Set the compiler version when releasing the `main` branch
+        if: github.event_name == 'push' && github.repository == 'facebook/relay' && github.ref == 'refs/heads/main'
+        run: yarn gulp setCompilerMainVersion
+        env:
+          RELEASE_COMMIT_SHA: ${{ github.sha }}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          # add --locked back when we have a better way to ensure it's up to date
+          args: --manifest-path=compiler/Cargo.toml --release --target x86_64-unknown-linux-musl
+      - uses: actions/upload-artifact@v2
+        with:
+          name: relay-compiler-linux-musl
+          path: compiler/target/x86_64-unknown-linux-musl/release/relay
+
   main-release:
     name: Publish to NPM
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.repository == 'facebook/relay'
-    needs: [js-tests, js-lint, typecheck, rust-tests, build-compiler]
+    needs: [js-tests, js-lint, typecheck, rust-tests, build-compiler, build-compiler-musl]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -149,6 +180,11 @@ jobs:
         with:
           name: relay-compiler-linux-x64
           path: artifacts/linux-x64
+      - name: Download artifact relay-compiler-linux-musk
+        uses: actions/download-artifact@v2
+        with:
+          name: relay-compiler-linux-musl
+          path: artifacts/linux-musl
       - name: Download artifact relay-compiler-macos-x64
         uses: actions/download-artifact@v2
         with:
@@ -168,6 +204,7 @@ jobs:
         working-directory: artifacts
         run: |
           chmod +x linux-x64/relay
+          chmod +x linux-musl/relay
           chmod +x macos-x64/relay
           chmod +x macos-arm64/relay
 
