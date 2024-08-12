@@ -19,7 +19,6 @@ Hook used to make it easy to safely load and retain queries. It will keep a quer
 This hook is designed to be used with [`usePreloadedQuery`](../use-preloaded-query) to implement the "render-as-you-fetch" pattern. For more information, see the [Fetching Queries for Render](../../guided-tour/rendering/queries/) guide.
 
 ```js
-import type {AppQuery as AppQueryType} from 'AppQuery.graphql';
 import type {PreloadedQuery} from 'react-relay';
 
 const {useQueryLoader, usePreloadedQuery} = require('react-relay');
@@ -32,18 +31,13 @@ const AppQuery = graphql`
   }
 `;
 
-type Props = {
-  initialQueryRef: PreloadedQuery<AppQueryType>,
-};
-
-function QueryFetcherExample(props: Props) {
+function QueryFetcherExample() {
   const [
     queryReference,
     loadQuery,
     disposeQuery,
   ] = useQueryLoader(
     AppQuery,
-    props.initialQueryRef, /* e.g. provided by router */
   );
 
   if (queryReference == null) {
@@ -65,7 +59,7 @@ function QueryFetcherExample(props: Props) {
 }
 
 function NameDisplay({ queryReference }) {
-  const data = usePreloadedQuery<AppQueryType>(AppQuery, queryReference);
+  const data = usePreloadedQuery(AppQuery, queryReference);
 
   return <h1>{data.user?.name}</h1>;
 }
@@ -76,17 +70,12 @@ function NameDisplay({ queryReference }) {
 * `query`: GraphQL query specified using a `graphql` template literal.
 * `initialQueryRef`: _*[Optional]*_ An initial `PreloadedQuery` to be used as the initial value of the `queryReference` stored in state and returned by `useQueryLoader`.
 
-
-### Flow Type Parameters
-
-* `TQuery`: the type of the query
-
 ### Return value
 
 A tuple containing the following values:
 
 * `queryReference`: the query reference, or `null`.
-* `loadQuery`: a callback that, when executed, will load a query, which will be accessible as `queryReference`. If a previous query was loaded, it will dispose of it. It will throw an error if called during React's render phase.
+* `loadQuery`: a callback that, when executed, will load a query, which will be accessible as `queryReference`. If a previous query was loaded, it will dispose of it. It should not be called during React's render phase.
     * Parameters
         * `variables`: the variables with which the query is loaded.
         * `options`: `LoadQueryOptions`. An optional options object, containing the following keys:
@@ -101,6 +90,6 @@ A tuple containing the following values:
 
 * The `loadQuery` callback will fetch data if passed a query, or data and the query if passed a preloadable concrete request. Once both the query and data are available, the data from the query will be written to the store. This differs from the behavior of `preloadQuery_DEPRECATED`, which would only write data to the store if the query was passed to `usePreloadedQuery`.
 * This query reference will be retained by the Relay store, preventing the data from being garbage collected. Once `.dispose()` is called on the query reference, the data is liable to be garbage collected.
-* The `loadQuery` callback will throw an error if it is called during React's render phase.
+* The `loadQuery` callback should not be called during React's render phase.
 
 <DocsRating />

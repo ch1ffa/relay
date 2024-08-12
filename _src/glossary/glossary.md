@@ -8,7 +8,7 @@ keywords:
 ---
 
 import DocsRating from '@site/src/core/DocsRating';
-import {FbInternalOnly, OssOnly} from 'internaldocs-fb-helpers';
+import {FbInternalOnly, OssOnly} from 'docusaurus-plugin-internaldocs-fb/internal';
 
 ## 3D
 
@@ -186,7 +186,7 @@ See the [Thinking in Relay guide](../principles-and-architecture/thinking-in-rel
 A directive which can be added to a fragment spread or inline fragment to avoid blocking on that fragment's data.
 
 <FbInternalOnly>
-See the [documentation](https://www.internalfb.com/intern/wiki/Relay/Web/incremental-data-delivery-defer-stream/#defer).
+See [Incremental Data Delivery](https://www.internalfb.com/intern/staticdocs/relay/docs/guides/incremental-data-delivery/).
 </FbInternalOnly>
 
 ## Definition
@@ -209,7 +209,7 @@ In the compiler, a Document refers to a GraphQL literal that contains one or mor
 
 ## Directive
 
-A special instruction, starting with `@` and contained in a `graphql` literal or graphql file, which provides special instructions to the relay compiler or to the server. Examples include `@defer`, `@stream` and `@match`.
+A special instruction, starting with `@` and contained in a `graphql` literal or graphql file, which provides special instructions to the Relay compiler or to the server. Examples include `@defer`, `@stream` and `@match`.
 
 ## Disposable
 
@@ -313,7 +313,7 @@ Just like a query reference and a graphql tagged literal describing a query (i.e
 An internal class supporting lazily loaded queries. Exposes two important methods:
 
 * `read`, which is meant to be called during a component's render phase. It will attempt to fulfill a query from the store (by calling `environment.lookup`) and suspend if the data is not available. It furthermore writes the results from the attempted read (whether a promise, error or result) to an internal cache, and updates that cached value when the promise resolves or rejects.
-* `subscribe`, which is called during the commit phase, and establishes subscriptions to the relay store.
+* `subscribe`, which is called during the commit phase, and establishes subscriptions to the Relay store.
 
 If the component which calls `.read` successfully loads a query, but suspends on a subsequent hook before committing, the data from that query can be garbage collected before the component ultimately renders. Thus, components which rely on `FragmentResource` are at risk of rendering null data.
 
@@ -393,7 +393,7 @@ A directive that applies to fragments which enables developers to pass masked da
 Normally, data is read out using `useFragment`. However, this function can only be called during the render phase. If store data is needed in a outside of the render phase, a developer has several options:
 
 * read that data during the render phase, and pass it to the function/have the function close over that data. (See also [#relay])
-* pass a reference to an `@inline` fragment, which can then be accessed (outside of the render phase) using the `readInlineData` directive.
+* pass a reference to an `@inline` fragment, which can then be accessed (outside of the render phase) using the `readInlineData` function.
 
 This directive causes them to be read out when the parent fragment is read out, and unmasked by the call to `readInlineData`.
 
@@ -445,7 +445,7 @@ A GraphQL literal is a call to
 graphql`...`
 ```
 
-in your code. These are pre-processed, and replaced at build time with a [GraphlQLTaggedNode](#graphqltaggednode) containing an [AST](#ast) representation of the contents of the literal.
+in your code. These are pre-processed, and replaced at build time with a [GraphQLTaggedNode](#graphqltaggednode) containing an [AST](#ast) representation of the contents of the literal.
 
 ## Lookup
 
@@ -599,7 +599,7 @@ A field for which the value is an array of [values](#value) or [records](#record
 
 ## @preloadable
 
-A directive that modifies queries and which causes relay to generate `$Parameters.js` files and preloadable concrete requests. Required if the query is going to be used as part of an entry point.
+A directive that modifies queries and which causes Relay to generate `$Parameters.js` files and preloadable concrete requests. Required if the query is going to be used as part of an entry point.
 
 ## Preloadable Concrete Request
 
@@ -668,12 +668,11 @@ If the component which calls `.prepare` successfully loads a query, but suspends
 
 Compare to [fragment resource](#fragment-resource).
 
-## @raw_response_type
+## `@raw_response_type`
 
 A directive added to queries which tells Relay to generate types that cover the `optimisticResponse` parameter to `commitMutation`.
 
-<!-- TODO fix this link -->
-See the [documentation](../guided-tour/updating-data/local-data-updates) for more.
+See the [guided tour on updating data](../guided-tour/updating-data/graphql-mutations/#optimistic-response) for more.
 
 ## Reader
 
@@ -691,7 +690,7 @@ A reader AST contains information about which fragments are spread at a given lo
 
 TODO
 
-See [GraphlQLTaggedNode](#graphqltaggednode).
+See [GraphQLTaggedNode](#graphqltaggednode).
 
 ## Reader Selector
 
@@ -733,7 +732,7 @@ This yields efficiency gains. The fragment can be loaded as part of a single, la
 
 A directive that allows you to turn off data masking and is used on plural types.
 
-See the documentation.
+See [the documentation](../api-reference/graphql-and-directives/#relaymask-boolean).
 
 ## Relay Classic
 
@@ -753,7 +752,7 @@ An older version of Relay. This version of Relay had an API that was heavily foc
 
 Relay Resolvers is an experimental Relay feature which enables modeling derived state as client-only fields in Relay’s GraphQL graph.
 
-See also [the Relay Resolvers guide](../guides/relay-resolvers).
+See also [the Relay Resolvers Introduction](../guides/relay-resolvers/introduction.md).
 
 ## Release Buffer
 
@@ -761,11 +760,11 @@ As queries are released (no longer [retained](#retain)), their root nodes are st
 
 The size of the release buffer is configured with the `gcReleaseBufferSize` parameter.
 
-## @required
+## `@required`
 
-A Relay directive that makes handling potentially `null` values more egonomic.
+A Relay directive that makes handling potentially `null` values more ergonomic.
 
-See also [the @required guide](../guides/required-directive/).
+See also [the `@required` guide](../guides/required-directive/).
 
 ## Request
 
@@ -779,7 +778,7 @@ An object associating a [concrete request](#concrete-request) and [variables](#v
 
 ## Resolver
 
-An overloaded term, mostly referring to virtual fields, but also occassionally referring to other things.
+An overloaded term, mostly referring to virtual fields, but also occasionally referring to other things.
 
 ### When describing a field
 
@@ -846,7 +845,7 @@ A collection of all of the GraphQL types that are known to Relay, for a given [p
 
 The GraphQL [schema](#schema) is derived from annotations on Hack classes in the www repository.
 
-Periodically, those changes are synced to fbsource in a schema sync diff. If the updated schema would break relay on fbsource, these schema sync diffs will not land.
+Periodically, those changes are synced to fbsource in a schema sync diff. If the updated schema would break Relay on fbsource, these schema sync diffs will not land.
 
 If a field is removed from www, but is only used in fbsource, the application developer may not notice that the field cannot be removed. This is a common source of schema breakages.
 
@@ -891,7 +890,7 @@ TODO
 
 ## Subscribe
 
-A method exposed by the Relay store. Accepts a callback and a snapshot (see [lookup](#lookup)). The relay store will call this callback when [`notify`](#notify) is called, if the data referenced by that snapshot has been updated or invalidated.
+A method exposed by the Relay store. Accepts a callback and a snapshot (see [lookup](#lookup)). The Relay store will call this callback when [`notify`](#notify) is called, if the data referenced by that snapshot has been updated or invalidated.
 
 ## Subscription
 
